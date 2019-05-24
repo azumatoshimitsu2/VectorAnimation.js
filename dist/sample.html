@@ -3,77 +3,33 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Vector Animation</title>
-	<script src="Vector.js"></script>
-	<script src="Thing.js"></script>
 </head>
 <style>
-div {
+.thing {
 	position: absolute;
 	left: 100px;
-	top: 100px;
+	top:  100px;
 	background: #000;
 	width: 30px;
 	height: 30px;
 	border-radius: 100%;
 }
-.planet {
-	background: #ccc;
+.thing2 {
+	background: #0f0;
+}
+.thing3 {
+	background: #00f;
 }
 </style>
 <body>
 
-<div class="thing"></div>
-<div class="thing thing2"></div>
-<div class="planet"></div>
-<div class="planet planet2"></div>
+	<div id="stage">
+		<div class="thing"></div>
+		<div class="thing thing2"></div>
+		<div class="thing thing3"></div>
+	</div>
 
-<script>
-
-(function() {
-	var timer = {};
-	var planets = document.querySelectorAll('.planet');
-	var el = document.querySelector('.thing');
-	var el2 = document.querySelector('.thing2');
-	var elStyle = el.style;
-	var el2Style = el2.style;
-	var planetLocation = [ { x: 300, y: 300, g: 2 }, { x: 100, y: 100, g: 1 } ];
-	var things = [];
-
-	var callback = function(e) { console.log(e); }
-
-	things.push( new Thing({ location: { x: 100, y: 100 }, gravityPoint :planetLocation[0], callback: callback}) );
-
-	var thing = new Thing();
-		thing.set({ location: { x: 200, y: 200 }, gravityPoint :planetLocation[1], callback: callback});
-
-	things.push(thing);
-
-	for(var i = 0; i < planetLocation.length; i++) {
-		planets[i].style.left = planetLocation[i].x + 'px';
-		planets[i].style.top  = planetLocation[i].y + 'px';
-	}
-
-	timer = setInterval(function() {
-		for(var i = 0; i < things.length; i++) {
-			if(i== 0) {
-				things[i].arrive();
-				var pos = things[i].update().getPoint();
-				elStyle.left = pos.x + 'px';
-				elStyle.top  = pos.y + 'px';
-			} else {
-				things[i].seek();
-				var pos = things[i].update().getPoint();
-				el2Style.left = pos.x + 'px';
-				el2Style.top  = pos.y + 'px';
-			}
-		}
-
-	}, 33);
-
-
-})();
-
-</script>
+<script src="sample.js"></script>
 
 	
 </body>

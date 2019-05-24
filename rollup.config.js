@@ -1,0 +1,21 @@
+import resolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs'
+import babel from 'rollup-plugin-babel';
+import { uglify } from 'rollup-plugin-uglify';
+
+export default {
+  input: 'src/sample.js',
+  output: {
+    file: 'dist/sample.js',
+    format: 'cjs',
+    compact: true
+  },
+  plugins: [
+    resolve({ jsnext: true }), // npmモジュールを`node_modules`から読み込む
+    commonjs(), // CommonJSモジュールをES6に変換
+    babel({
+      exclude: 'node_modules/**' // only transpile our source code
+    }) // ES5に変換
+    ,uglify()
+  ]
+};

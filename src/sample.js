@@ -2,17 +2,17 @@ import VectorAnimation from './modules/VectorAnimation.js';
 
 (function() {
 	var timer = {};
-	var el = document.querySelector('.thing');
+	var el  = document.querySelector('.thing');
 	var el2 = document.querySelector('.thing2');
 	var el3 = document.querySelector('.thing3');
 	var elStyle = el.style;
 	var el2Style = el2.style;
 	var el3Style = el3.style;
-	var callback = function(e) { console.log("e"); }
+	var callback = function(e) { console.log(e); }
 	var gPoints = [ 
-					{ pos : { x: 300, y: 300 } , g : 1.5, mass : 10, minspeed : 4.0, callback : callback },
-					{ pos : { x: 300, y: 200 } , g : 0.5, mass : 20, minspeed : 1.8, callback : callback },
-					{ pos : { x: 330, y: 100 } , g : 0.5, mass : 40, minspeed : 1.8, callback : callback }
+					{ pos : { x: 300, y: 300 } , g : 1.0, mass : 10, minspeed : 4.0, callback : callback },
+					{ pos : { x: 30,  y: 200 } , g : 1.0, mass : 20, minspeed : 1.8, callback : callback },
+					{ pos : { x: 330, y: 100 } , g : 1.0, mass : 40, minspeed : 1.8, callback : callback }
 				];
 	var things = [];
 
@@ -22,7 +22,8 @@ import VectorAnimation from './modules/VectorAnimation.js';
 			stageId       : 'stage',
 			location      : { x: 100, y: 100 },
 			gravityPoints : gPoints,
-			gravDistance  : 140
+			gravDistance  : 140,
+			infinity      : true
 		})
 	);
 
@@ -48,10 +49,13 @@ import VectorAnimation from './modules/VectorAnimation.js';
 
 	things.forEach( (v, i) => {
 		v.showGravityPoints();
+		console.log(v.el)
+		console.log(v.stageId)
+		console.log(v.currentGPointNum)
 	});
 
 	el.addEventListener('moveEnd', function(e) {
-		console.log('move end')
+		console.log('move end');
 	});
 
 	function loop() {

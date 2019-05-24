@@ -5,29 +5,48 @@ export default class VectorAnimation {
 
 	constructor(arg) {
 		if(!arg) {
-			throw new Error('please argments 引数は必須です');
+			throw new Error('argments required. 引数は必須です');
 		}
-		this.el                     = arg.el || document.querySelector('body');
-		this.stageId                = arg.stageId;
-		this.location               = (arg.location)? arg.location : { x: 0, y: 0 },
-		this.friction               = arg.friction || 0.9,
-		this.velocity               = { x: 0, y: 0 },
-		this.acceleration           = { x: 0, y: 0 },
-		this.mass                   = arg.mass || 10,
-		this.maxspeed               = arg.maxspeed || 10,
-		this.minspeed               = arg.minspeed || 2.8;
-		this.damage                 = arg.damage || 0.98,
-		this.gravDistance           = arg.gravDistance || 100;
-		this.gravityPoints          = arg.gravityPoints || {};
-		this.currentGPointNum       = 0;
-		this.vector                 = Vector;
-		this.showGravityPointsColor = arg.showGravityPointsColor;
+		this._el                     = arg.el || document.querySelector('body');
+		this._stageId                = arg.stageId;
+		this._location               = (arg.location)? arg.location : { x: 0, y: 0 },
+		this._friction               = arg.friction || 0.9,
+		this._velocity               = { x: 0, y: 0 },
+		this._acceleration           = { x: 0, y: 0 },
+		this._mass                   = arg.mass || 10,
+		this._maxspeed               = arg.maxspeed || 10,
+		this._minspeed               = arg.minspeed || 2.8;
+		this._damage                 = arg.damage || 0.98,
+		this._gravDistance           = arg.gravDistance || 100;
+		this._gravityPoints          = arg.gravityPoints || {};
+		this._currentGPointNum       = 0;
+		this._showGravityPointsColor = arg.showGravityPointsColor;
+		this._isAnimationEnd         = false;
+		this._infinity               = arg.infinity || false;
+	}
 
-		this.gravityPoints.forEach((v, i) => {
-			v.isAnimationEnd = false;
-		});
+	get el() {
+		return this._el;
+	}
 
-		console.log(this.gravDistance)
+	get stageId() {
+		return this._stageId;
+	}
+
+	get currentGPointNum() {
+		return this._currentGPointNum;
+	}
+
+	set currentGPointNum(num) {
+		this._currentGPointNum = num;
+	}
+
+	get isAnimationEnd() {
+		return this._isAnimationEnd;
+	}
+
+	set isAnimationEnd(bool) {
+		this._isAnimationEnd = bool;
 	}
 
 	draw() {
@@ -35,56 +54,61 @@ export default class VectorAnimation {
 	}
 
 	update() {
-	    this.velocity     = this.vector.add(this.velocity, this.acceleration);
-	    this.velocity     = this.vector.mult(this.velocity, this.damage);
-	    this.location     = this.vector.add(this.location, this.velocity);
-	    this.acceleration = this.vector.mult(this.acceleration, 0);
+	    this._velocity     = Vector.add(this._velocity, this._acceleration);
+	    this._velocity     = Vector.mult(this._velocity, this._damage);
+	    this._location     = Vector.add(this._location, this._velocity);
+	    this._acceleration = Vector.mult(this._acceleration, 0);
 		return this;
 	}
 
 	applyForce(force) {
-		force = this.vector.div(force, this.mass);
-		this.acceleration = this.vector.add(this.acceleration, force);
+		force = Vector.div(force, this._mass);
+		this._acceleration = Vector.add(this._acceleration, force);
 		return this;
 	}
 
 	seek(obj) {
 		let arg       = obj || {};
-		let g         = arg.g || this.gravityPoints[this.currentGPointNum].g;
-		let direction = (arg.x && arg.y)? { x: arg.x, y: arg.y } : this.gravityPoints[this.currentGPointNum].pos;
-		let sub       = this.vector.sub(direction, this.location);
-		let normal    = this.vector.normalize(sub);
-		let force     = this.vector.mult(normal, g);
+		let g         = arg.g || this._gravityPoints[this._currentGPointNum].g;
+		let direction = (arg.x && arg.y)? { x: arg.x, y: arg.y } : this._gravityPoints[this._currentGPointNum].pos;
+		let sub       = Vector.sub(direction, this._location);
+		let normal    = Vector.normalize(sub);
+		let force     = Vector.mult(normal, g);
 		this.applyForce(force);
 	}
 
 	arrive(arg) {
-		let gPoint  = this.gravityPoints[this.currentGPointNum];
-		let sub     = this.vector.sub(gPoint.pos, this.location);
-		let diff    = this.vector.mag(sub);
-		let normal  = this.vector.normalize(sub);
+		let gPoint  = this._gravityPoints[this._currentGPointNum];
+		let sub     = Vector.sub(gPoint.pos, this._location);
+		let diff    = Vector.mag(sub);
+		let normal  = Vector.normalize(sub);
 		let desired = { x: 0, y: 0 };
 		let steer   = { x: 0, y: 0 };
 
-		if(diff < this.gravDistance) {
-			let isNextPoint = (this.gravityPoints.length - 1 > this.currentGPointNum)? true : false;
-			let mapedScalar = this.minspeed;
+		if(diff < this._gravDistance) {
+			let isNextPoint = (this._gravityPoints.length - 1 > this._currentGPointNum)? true : false;
+			let mapedScalar = this._minspeed;
 
 			if(isNextPoint) {
-				this.currentGPointNum += 1;
-				this.acceleration      = { x: 0, y: 0 };
+				this._currentGPointNum += 1;
+				this._acceleration      = { x: 0, y: 0 };
+			}
+			else if(this._infinity) {
+				console.log('infinity')
+				this._currentGPointNum = 0;
+				this._acceleration     = { x: 0, y: 0 };
 			} else {
-				mapedScalar = this.map(diff, 0, this.gravDistance, 0, 4);
+				mapedScalar = this.map(diff, 0, this._gravDistance, 0, 4);
 			}
 
-			desired = this.vector.mult(normal, mapedScalar);
-			steer   = this.vector.sub(desired, this.velocity);
+			desired = Vector.mult(normal, mapedScalar);
+			steer   = Vector.sub(desired, this._velocity);
 			this.applyForce(steer);
 
-			if(!gPoint.isAnimationEnd && this.vector.mag(sub) < 1) {
-				gPoint.isAnimationEnd = true;
+			if(!this._isAnimationEnd && Vector.mag(sub) < 1) {
+				this._isAnimationEnd = true;
 				gPoint.callback(this);
-				dispatchEvent(this.el, 'moveEnd');
+				dispatchEvent(this._el, 'moveEnd');
 			}
 		} else {
 			this.seek();
@@ -92,7 +116,7 @@ export default class VectorAnimation {
 	}
 
 	getPoint() {
-		let prop = { x: this.location.x, y: this.location.y };
+		let prop = { x: this._location.x, y: this._location.y };
 		return prop;
 	}
 	//値を規制
@@ -103,9 +127,9 @@ export default class VectorAnimation {
 	}
 
 	showGravityPoints() {
-		let stage = document.getElementById(this.stageId);
-		this.gravityPoints.forEach( (v, i) => {
-			let gcolor = this.showGravityPointsColor;
+		let stage = document.getElementById(this._stageId);
+		this._gravityPoints.forEach( (v, i) => {
+			let gcolor = this._showGravityPointsColor;
 			let color  = (gcolor)? gcolor : '#000';
 			let div    = document.createElement('div');
 			div.appendChild(document.createTextNode(i));

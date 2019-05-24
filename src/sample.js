@@ -12,40 +12,46 @@ import VectorAnimation from './modules/VectorAnimation.js';
 	var gPoints = [ 
 					{ pos : { x: 300, y: 300 } , g : 1.5, mass : 10, minspeed : 4.0, callback : callback },
 					{ pos : { x: 300, y: 200 } , g : 0.5, mass : 20, minspeed : 1.8, callback : callback },
-					{ pos : { x: 330, y: 300 } , g : 0.5, mass : 40, minspeed : 1.8, callback : callback }
+					{ pos : { x: 330, y: 100 } , g : 0.5, mass : 40, minspeed : 1.8, callback : callback }
 				];
 	var things = [];
 
 	things.push( new VectorAnimation(
 		{
-			stageId : 'stage',
-			location : { x: 100, y: 100 },
-			gravityPoints : gPoints
+			el : el,
+			stageId       : 'stage',
+			location      : { x: 100, y: 100 },
+			gravityPoints : gPoints,
+			gravDistance  : 140
 		})
 	);
 
 	things.push( new VectorAnimation(
 		{
-			stageId : 'stage',
-			location: { x: 200, y: 200 },
+			stageId                : 'stage',
+			location               : { x: 200, y: 200 },
+			showGravityPointsColor : '#0f0',
 			gravityPoints : [
 				{ pos: { x: 100, y: 100 }, g: 1, callback: callback }
 			],
-			showGravityPointsColor : '#0f0'
 		})
 	);
 
 	things.push( new VectorAnimation(
 		{
-			stageId : 'stage',
-			location : { x: 100, y: 100 },
-			gravityPoints : [ { pos: { x: 400, y: 100 }, g: 1, callback: callback } ],
-			showGravityPointsColor : '#00f'
+			stageId                : 'stage',
+			location               : { x: 100, y: 100 },
+			showGravityPointsColor : '#00f',
+			gravityPoints          : [ { pos: { x: 400, y: 100 }, g: 1, callback: callback } ]
 		})
 	);
 
 	things.forEach( (v, i) => {
-		// v.showGravityPoints();
+		v.showGravityPoints();
+	});
+
+	el.addEventListener('moveEnd', function(e) {
+		console.log('move end')
 	});
 
 	function loop() {

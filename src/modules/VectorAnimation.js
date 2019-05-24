@@ -1,4 +1,5 @@
 import Vector from './Vector.js';
+import dispatchEvent from './dispatchEvent.js';
 
 export default class VectorAnimation {
 
@@ -6,6 +7,7 @@ export default class VectorAnimation {
 		if(!arg) {
 			throw new Error('please argments 引数は必須です');
 		}
+		this.el                     = arg.el || document.querySelector('body');
 		this.stageId                = arg.stageId;
 		this.location               = (arg.location)? arg.location : { x: 0, y: 0 },
 		this.friction               = arg.friction || 0.9,
@@ -15,7 +17,7 @@ export default class VectorAnimation {
 		this.maxspeed               = arg.maxspeed || 10,
 		this.minspeed               = arg.minspeed || 2.8;
 		this.damage                 = arg.damage || 0.98,
-		this.rad                    = arg.rad || 100;
+		this.gravDistance           = arg.gravDistance || 100;
 		this.gravityPoints          = arg.gravityPoints || {};
 		this.currentGPointNum       = 0;
 		this.vector                 = Vector;
@@ -24,6 +26,8 @@ export default class VectorAnimation {
 		this.gravityPoints.forEach((v, i) => {
 			v.isAnimationEnd = false;
 		});
+
+		console.log(this.gravDistance)
 	}
 
 	draw() {
@@ -62,17 +66,17 @@ export default class VectorAnimation {
 		let desired = { x: 0, y: 0 };
 		let steer   = { x: 0, y: 0 };
 
-		if(diff < this.rad) {
-			let isNextPoint = false;
-
-			if(this.gravityPoints.length - 1 > this.currentGPointNum) {
-				isNextPoint = true;
-			}
-
+		if(diff < this.gravDistance) {
+			let isNextPoint = (this.gravityPoints.length - 1 > this.currentGPointNum)? true : false;
 			let mapedScalar = this.minspeed;
-			if(!isNextPoint) {
-				mapedScalar = this.map(diff, 0, this.rad, 0, 4);
+
+			if(isNextPoint) {
+				this.currentGPointNum += 1;
+				this.acceleration      = { x: 0, y: 0 };
+			} else {
+				mapedScalar = this.map(diff, 0, this.gravDistance, 0, 4);
 			}
+
 			desired = this.vector.mult(normal, mapedScalar);
 			steer   = this.vector.sub(desired, this.velocity);
 			this.applyForce(steer);
@@ -80,10 +84,7 @@ export default class VectorAnimation {
 			if(!gPoint.isAnimationEnd && this.vector.mag(sub) < 1) {
 				gPoint.isAnimationEnd = true;
 				gPoint.callback(this);
-				if(isNextPoint) {
-					this.currentGPointNum += 1;
-					this.acceleration      = { x: 0, y: 0 };
-				}
+				dispatchEvent(this.el, 'moveEnd');
 			}
 		} else {
 			this.seek();
